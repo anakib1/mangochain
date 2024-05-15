@@ -15,21 +15,29 @@ class Transaction:
         self.to_id = to_id
         self.tr_id = uuid4()
         self.amount = amount
+        self.signature = None
 
     def __repr__(self):
         return json.dumps(
             {"transaction_id": str(self.tr_id), "from_id": self.from_id, "to_id": self.to_id, "amount": self.amount})
 
+    def __hash__(self):
+        return hashlib.sha256(str(self.__repr__()).encode()).hexdigest()
+
+
 
 class Block:
-    def __init__(self, previous_block, transactions):
+    def __init__(self):
         self.timestamp = current_milli_time()
-        self.transactions = transactions
-        self.previous_hash: str = previous_block.__hash__() if previous_block is not None else None
+        self.transactions = []
+        self.previous_hash: str = None
+        self.balances = {}
         self.nonce = 0
+
     def __repr__(self):
         return json.dumps({"transactions": [x.__repr__() for x in self.transactions],
-                           "previous_hash": self.previous_hash, "nonce": self.nonce, "block_time": self.timestamp})
+                           "previous_hash": self.previous_hash, "nonce": self.nonce, "block_time": self.timestamp,
+                           "balances": self.balances})
 
     def __hash__(self):
         return hashlib.sha256(str(self.__repr__()).encode()).hexdigest()

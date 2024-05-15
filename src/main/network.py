@@ -5,6 +5,7 @@ from typing import List
 class Network:
     def __init__(self):
         self.blocks = []
+        self.users = {}
         self.consumers = []
 
     def get_blocks(self) -> List[Block]:
@@ -21,3 +22,8 @@ class Network:
     def add_transaction(self, transaction):
         for consumer in self.consumers:
             consumer.on_transaction(transaction)
+
+    def add_user(self, name, public_key):
+        if name in self.users:
+            raise Exception(f'User {name} already exists.')
+        self.users[name] = public_key

@@ -29,12 +29,12 @@ class LineProcessor(threading.Thread):
             try:
                 self.on_line(line)
             except Exception as ex:
-                print('Could not process command. Ex = ', ex)
+                print('Could not process command. Ex = ', ex.with_traceback())
 
     def on_line(self, line: str):
-        from_id, to_id, amount = line.split()
+        to_id, amount = line.split()
         amount = float(amount)
-        self.client.add_transaction(from_id, to_id, amount)
+        self.client.add_transaction(to_id, amount)
 
 
 
