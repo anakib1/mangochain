@@ -3,6 +3,10 @@ from .network import Network
 from typing import List, Tuple, Dict, Any
 from .signature import verify_signature
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from cryptography.hazmat.primitives.asymmetric import rsa
+
 MAX_TRANSACTIONS = 2
 DIFFICULTY = 4
 
@@ -45,7 +49,9 @@ class Miner:
             print('Unknown sender.')
             return
 
-        if not verify_signature(transaction.__hash__(), transaction.signature, key):
+        key = load_pem_public_key(bytes.fromhex(key))
+
+        if not verify_signature(transaction.__hash__(), bytes.fromhex(transaction.signature), key):
             print('Got invalid transaction. Signature does not match.')
             return
 

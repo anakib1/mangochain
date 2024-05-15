@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 from .signature import sign_message
 
-
+from cryptography.hazmat.primitives import serialization
 
 
 class Client:
@@ -17,7 +17,7 @@ class Client:
             backend=default_backend()
         )
         self.public_key = self.private_key.public_key()
-        self.network.add_user(self.name, self.public_key)
+        self.network.add_user(self.name, self.public_key.public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo).hex())
 
     def add_transaction(self, to_id, amount):
         transaction = Transaction(self.name, to_id, amount)

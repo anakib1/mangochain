@@ -13,7 +13,7 @@ def sign_message(message, private_key):
         padding.PKCS1v15(),
         hashes.SHA256()
     )
-    return signature
+    return signature.hex()
 
 
 def verify_signature(message, signature, public_key):
