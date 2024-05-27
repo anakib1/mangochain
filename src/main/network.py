@@ -56,13 +56,13 @@ class CentralClient:
             print(f"Error: {response.status_code} - {response.reason}")
 
     def add_user(self, username, signature):
-        return requests.post(self.url, json=json.dumps({'userName': username, "signature": signature}))
+        return requests.post(self.url + '/users', json=json.dumps({'userName': username, "signature": signature}))
 
     def add_block(self, block):
-        return requests.post(self.url, json=block.__repr__())
+        return requests.post(self.url + '/blocks', json=block.__repr__())
 
     def add_transaction(self, transaction):
-        return requests.post(self.url, json=json.dumps(transaction.to_json()))
+        return requests.post(self.url + '/transactions', json=json.dumps(transaction.to_json()))
 
 
 class Network:
