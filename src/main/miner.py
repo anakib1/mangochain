@@ -38,9 +38,13 @@ class Miner:
         if len(self.chain.values()) == 0:
             print('Chain is empty. Building genesis.')
             genesis = Block()
-            genesis.balances = {'alice': 1000, 'bob': 1000}  # ToDo: CONFIGURE
+            genesis.balances = {'alice': 1000, 'bob': 1000, 'gven': 1000, 'andrew': 1000,
+                                'gera': 1000}  # ToDo: CONFIGURE
             self.mine(genesis)
+            print('Good genesis: ', genesis)
+            print(genesis.__hash__())
             self.chain[genesis.__hash__()] = (1, genesis)
+            self.network.add_block(genesis)
 
     def on_transaction(self, transaction: Transaction):
         key = self.network.users.get(transaction.from_id, None)
@@ -79,10 +83,13 @@ class Miner:
         if block_hash[:DIFFICULTY] != zeros_bytes:
             print('\nNetwork node received invalid block. Hash is invalid.')
         else:
-            this_cnt, this_chain = self.chain.get(block.previous_hash, (0, None))
-            if this_chain is None:
-                print('\nNetwork node received invalid block. Previous block not found.')
-                return
+            if block.previous_hash is not None:
+                this_cnt, this_chain = self.chain.get(block.previous_hash, (0, None))
+                if this_chain is None:
+                    print('\nNetwork node received invalid block. Previous block not found.')
+                    return
+            else:
+                this_cnt = 0
             self.chain[block.__hash__()] = (this_cnt + 1, block)
             if this_cnt + 1 > self.main_chain[0]:
                 self.main_chain = self.chain[block.__hash__()]

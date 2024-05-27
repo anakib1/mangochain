@@ -2,7 +2,9 @@ from .models import Block, Transaction
 from typing import List
 import requests
 import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 class CentralClient:
     def __init__(self, url, port):
@@ -19,10 +21,10 @@ class CentralClient:
                 try:
                     ret.append(Block.from_json(json.loads(x)))
                 except Exception as ex:
-                    print('Broken block. Ex = ', ex)
+                    logger.warning('Broken block. Ex = ', ex)
             return ret
         else:
-            print(f"Error: {response.status_code} - {response.reason}")
+            logger.warning(f"Error: {response.status_code} - {response.reason}")
 
     def get_transactions(self):
 
@@ -35,10 +37,10 @@ class CentralClient:
                 try:
                     ret.append(Transaction.from_json(json.loads(x)))
                 except Exception as ex:
-                    print('Broken transaction. Ex = ', ex)
+                    logger.warning('Broken transaction. Ex = ', ex)
             return ret
         else:
-            print(f"Error: {response.status_code} - {response.reason}")
+            logger.warning(f"Error: {response.status_code} - {response.reason}")
 
     def get_users(self):
         response = requests.get(self.url + "/users")
@@ -49,20 +51,20 @@ class CentralClient:
                 try:
                     ret.update({x['userName']: x['signature']})
                 except Exception as ex:
-                    print('Broken users. Ex = ', ex)
+                    logger.warning('Broken users. Ex = ', ex)
 
             return ret
         else:
-            print(f"Error: {response.status_code} - {response.reason}")
+            logger.warning(f"Error: {response.status_code} - {response.reason}")
 
     def add_user(self, username, signature):
-        return requests.post(self.url + '/users', json=json.dumps({'userName': username, "signature": signature}))
+        return requests.post(self.url + '/users', json={'userName': username, "signature": signature})
 
     def add_block(self, block):
-        return requests.post(self.url + '/blocks', json=block.__repr__())
+        return requests.post(self.url + '/blocks', json=block.to_json())
 
     def add_transaction(self, transaction):
-        return requests.post(self.url + '/transactions', json=json.dumps(transaction.to_json()))
+        return requests.post(self.url + '/transactions', json=transaction.to_json())
 
 
 class Network:
@@ -79,13 +81,15 @@ class Network:
         self.consumers.append(consumer)
 
     def add_block(self, block):
-        self.client.add_block(block)
+        resp = self.client.add_block(block)
+        logger.debug('add_block returned ', resp.status_code)
         for consumer in self.consumers:
             consumer.on_block(block)
         self.blocks.append(block)
 
     def add_transaction(self, transaction):
-        self.client.add_transaction(transaction)
+        resp = self.client.add_transaction(transaction)
+        logger.debug('add_transaction returned ', resp.status_code)
         for consumer in self.consumers:
             consumer.on_transaction(transaction)
 
